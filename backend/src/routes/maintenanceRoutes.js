@@ -4,19 +4,16 @@ const { authenticateToken, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Get all maintenance records
-router.get('/', authenticateToken, maintenanceController.getAllMaintenance);
+// All routes require authentication
+router.use(authenticateToken);
 
-// Get maintenance by ID
-router.get('/:id', authenticateToken, maintenanceController.getMaintenanceById);
+// Read routes (semua role bisa akses)
+router.get('/', maintenanceController.getAllMaintenance);
+router.get('/:id', maintenanceController.getMaintenanceById);
 
-// Create maintenance record
-router.post('/', authenticateToken, maintenanceController.createMaintenance);
-
-// Update maintenance
-router.put('/:id', authenticateToken, authorize('admin', 'staff'), maintenanceController.updateMaintenance);
-
-// Delete maintenance
-router.delete('/:id', authenticateToken, authorize('admin'), maintenanceController.deleteMaintenance);
+// Write routes (hanya admin, kepala_sekolah, dan staff)
+router.post('/', authorize('admin', 'kepala_sekolah', 'staff', 'guru'), maintenanceController.createMaintenance);
+router.put('/:id', authorize('admin', 'staff'), maintenanceController.updateMaintenance);
+router.delete('/:id', authorize('admin'), maintenanceController.deleteMaintenance);
 
 module.exports = router;

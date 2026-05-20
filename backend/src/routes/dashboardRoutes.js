@@ -1,22 +1,17 @@
 const express = require('express');
 const dashboardController = require('../controllers/dashboardController');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Get dashboard statistics
-router.get('/stats', authenticateToken, dashboardController.getDashboardStats);
+// All dashboard routes require authentication
+router.use(authenticateToken);
 
-// Get items by condition
-router.get('/items-condition', authenticateToken, dashboardController.getItemsByCondition);
-
-// Get borrowing statistics
-router.get('/borrowing-stats', authenticateToken, dashboardController.getBorrowingStats);
-
-// Get top borrowed items
-router.get('/top-borrowed', authenticateToken, dashboardController.getTopBorrowedItems);
-
-// Get recent activities
-router.get('/activities', authenticateToken, dashboardController.getRecentActivities);
+// Dashboard statistics (hanya admin dan kepala_sekolah)
+router.get('/stats', authorize('admin', 'kepala_sekolah'), dashboardController.getDashboardStats);
+router.get('/items/condition', authorize('admin', 'kepala_sekolah'), dashboardController.getItemsByCondition);
+router.get('/borrowing/stats', authorize('admin', 'kepala_sekolah'), dashboardController.getBorrowingStats);
+router.get('/items/top-borrowed', authorize('admin', 'kepala_sekolah'), dashboardController.getTopBorrowedItems);
+router.get('/activities/recent', authorize('admin', 'kepala_sekolah'), dashboardController.getRecentActivities);
 
 module.exports = router;

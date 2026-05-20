@@ -4,19 +4,16 @@ const { authenticateToken, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Get all suppliers
-router.get('/', authenticateToken, supplierController.getAllSuppliers);
+// All routes require authentication
+router.use(authenticateToken);
 
-// Get supplier by ID
-router.get('/:id', authenticateToken, supplierController.getSupplierById);
+// Read routes (semua role bisa akses)
+router.get('/', supplierController.getAllSuppliers);
+router.get('/:id', supplierController.getSupplierById);
 
-// Create supplier
-router.post('/', authenticateToken, authorize('admin', 'staff'), supplierController.createSupplier);
-
-// Update supplier
-router.put('/:id', authenticateToken, authorize('admin', 'staff'), supplierController.updateSupplier);
-
-// Delete supplier
-router.delete('/:id', authenticateToken, authorize('admin'), supplierController.deleteSupplier);
+// Write routes (hanya admin dan staff)
+router.post('/', authorize('admin', 'staff'), supplierController.createSupplier);
+router.put('/:id', authorize('admin', 'staff'), supplierController.updateSupplier);
+router.delete('/:id', authorize('admin', 'staff'), supplierController.deleteSupplier);
 
 module.exports = router;

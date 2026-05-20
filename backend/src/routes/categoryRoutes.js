@@ -4,19 +4,16 @@ const { authenticateToken, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Get all categories
-router.get('/', authenticateToken, categoryController.getAllCategories);
+// All routes require authentication
+router.use(authenticateToken);
 
-// Get category by ID
-router.get('/:id', authenticateToken, categoryController.getCategoryById);
+// Read routes (semua role bisa akses)
+router.get('/', categoryController.getAllCategories);
+router.get('/:id', categoryController.getCategoryById);
 
-// Create category
-router.post('/', authenticateToken, authorize('admin', 'staff'), categoryController.createCategory);
-
-// Update category
-router.put('/:id', authenticateToken, authorize('admin', 'staff'), categoryController.updateCategory);
-
-// Delete category
-router.delete('/:id', authenticateToken, authorize('admin'), categoryController.deleteCategory);
+// Write routes (hanya admin)
+router.post('/', authorize('admin'), categoryController.createCategory);
+router.put('/:id', authorize('admin'), categoryController.updateCategory);
+router.delete('/:id', authorize('admin'), categoryController.deleteCategory);
 
 module.exports = router;

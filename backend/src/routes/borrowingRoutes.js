@@ -1,31 +1,21 @@
 const express = require('express');
 const borrowingController = require('../controllers/borrowingController');
 const { authenticateToken, authorize } = require('../middleware/auth');
-const { validateBorrowing, validateRequest } = require('../utils/validators');
+const { validateRequest, validateBorrowing } = require('../utils/validators');
 
 const router = express.Router();
 
-// Get all borrowings
-router.get('/', authenticateToken, borrowingController.getAllBorrowings);
+// All routes require authentication
+router.use(authenticateToken);
 
-// Get borrowing by ID
-router.get('/:id', authenticateToken, borrowingController.getBorrowingById);
+// Read routes
+router.get('/', borrowingController.getAllBorrowings);
+router.get('/:id', borrowingController.getBorrowingById);
+router.get('/overdue/list', borrowingController.getOverdueBorrowings);
+router.get('/user/:user_id', borrowingController.getUserBorrowingHistory);
 
-// Get overdue borrowings
-router.get('/overdue/list', authenticateToken, authorize('admin', 'staff'), borrowingController.getOverdueBorrowings);
-
-// Get user borrowing history
-router.get('/history/:user_id', authenticateToken, borrowingController.getUserBorrowingHistory);
-
-// Create borrowing
-router.post('/',
-  authenticateToken,
-  validateBorrowing(),
-  validateRequest,
-  borrowingController.createBorrowing
-);
-
-// Return borrowing
-router.post('/:id/return', authenticateToken, borrowingController.returnBorrowing);
+// Write routes (hanya admin, kepala_sekolah, dan staff)
+router.post('/', authorize('admin', 'kepala_sekolah', 'staff'), validateBorrowing(), validateRequest, borrowingController.createBorrowing);
+router.put('/:id/return', authorize('admin', 'kepala_sekolah', 'staff'), borrowingController.returnBorrowing);
 
 module.exports = router;

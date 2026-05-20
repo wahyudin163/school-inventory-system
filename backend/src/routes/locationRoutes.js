@@ -4,19 +4,16 @@ const { authenticateToken, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Get all locations
-router.get('/', authenticateToken, locationController.getAllLocations);
+// All routes require authentication
+router.use(authenticateToken);
 
-// Get location by ID
-router.get('/:id', authenticateToken, locationController.getLocationById);
+// Read routes (semua role bisa akses)
+router.get('/', locationController.getAllLocations);
+router.get('/:id', locationController.getLocationById);
 
-// Create location
-router.post('/', authenticateToken, authorize('admin', 'staff'), locationController.createLocation);
-
-// Update location
-router.put('/:id', authenticateToken, authorize('admin', 'staff'), locationController.updateLocation);
-
-// Delete location
-router.delete('/:id', authenticateToken, authorize('admin'), locationController.deleteLocation);
+// Write routes (hanya admin)
+router.post('/', authorize('admin'), locationController.createLocation);
+router.put('/:id', authorize('admin'), locationController.updateLocation);
+router.delete('/:id', authorize('admin'), locationController.deleteLocation);
 
 module.exports = router;

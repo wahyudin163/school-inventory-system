@@ -1,5 +1,5 @@
 const express = require('express');
-const userRoutes = require('./userRoutes');
+const authRoutes = require('./authRoutes');
 const itemRoutes = require('./itemRoutes');
 const categoryRoutes = require('./categoryRoutes');
 const locationRoutes = require('./locationRoutes');
@@ -12,15 +12,11 @@ const router = express.Router();
 
 // Health check
 router.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    message: 'School Inventory System API is running',
-    timestamp: new Date().toISOString()
-  });
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// API routes
-router.use('/users', userRoutes);
+// API Routes
+router.use('/auth', authRoutes);
 router.use('/items', itemRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/locations', locationRoutes);

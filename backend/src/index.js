@@ -2,9 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
-const logger = require('./middleware/logger');
+const path = require('path');
+const fs = require('fs');
+
+const routes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
-const apiRoutes = require('./routes');
+const logger = require('./middleware/logger');
+const { runMigrations } = require('../migrations');
 
 dotenv.config();
 
@@ -22,27 +26,46 @@ app.use(express.urlencoded({ extended: true }));
 app.use(logger);
 
 // Static files
-app.use('/uploads', express.static('uploads'));
+const uploadDir = process.env.UPLOAD_DIR || './uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadDir));
 
 // API Routes
-app.use('/api', apiRoutes);
+app.use('/api', routes);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route tidak ditemukan'
-  });
-});
-
-// Error handler
+// Error Handler
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`✅ Server berjalan di port ${PORT}`);
-  console.log(`📡 API URL: http://localhost:${PORT}/api`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+// Initialize database and start server
+const startServer = async () => {
+  try {
+    // Run migrations
+    console.log('Running database migrations...');
+    await runMigrations();
+
+    // Start server
+    app.listen(PORT, () => {
+      console.log(`\n╔════════════════════════════════════════╗`);
+      console.log(`║  School Inventory System Backend       ║`);
+      console.log(`║  Running on port ${PORT}                      ║`);
+      console.log(`║  http://localhost:${PORT}                 ║`);
+      console.log(`╚════════════════════════════════════════╝\n`);
+      console.log('📍 API Health Check: http://localhost:' + PORT + '/api/health');
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully...');
+  process.exit(0);
 });
+
+startServer();
 
 module.exports = app;
