@@ -1,7 +1,8 @@
 const express = require('express');
-const router = express.Router();
 const locationController = require('../controllers/locationController');
 const { authenticateToken, authorize } = require('../middleware/auth');
+
+const router = express.Router();
 
 // Get all locations
 router.get('/', authenticateToken, locationController.getAllLocations);

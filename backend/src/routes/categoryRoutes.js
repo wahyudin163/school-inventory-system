@@ -1,7 +1,8 @@
 const express = require('express');
-const router = express.Router();
 const categoryController = require('../controllers/categoryController');
 const { authenticateToken, authorize } = require('../middleware/auth');
+
+const router = express.Router();
 
 // Get all categories
 router.get('/', authenticateToken, categoryController.getAllCategories);

@@ -1,7 +1,8 @@
 const express = require('express');
-const router = express.Router();
 const maintenanceController = require('../controllers/maintenanceController');
 const { authenticateToken, authorize } = require('../middleware/auth');
+
+const router = express.Router();
 
 // Get all maintenance records
 router.get('/', authenticateToken, maintenanceController.getAllMaintenance);

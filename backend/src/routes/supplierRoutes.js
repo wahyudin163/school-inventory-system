@@ -1,7 +1,8 @@
 const express = require('express');
-const router = express.Router();
 const supplierController = require('../controllers/supplierController');
 const { authenticateToken, authorize } = require('../middleware/auth');
+
+const router = express.Router();
 
 // Get all suppliers
 router.get('/', authenticateToken, supplierController.getAllSuppliers);

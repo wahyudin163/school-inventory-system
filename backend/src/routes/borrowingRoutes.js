@@ -1,8 +1,9 @@
 const express = require('express');
-const router = express.Router();
 const borrowingController = require('../controllers/borrowingController');
 const { authenticateToken, authorize } = require('../middleware/auth');
 const { validateBorrowing, validateRequest } = require('../utils/validators');
+
+const router = express.Router();
 
 // Get all borrowings
 router.get('/', authenticateToken, borrowingController.getAllBorrowings);
@@ -14,12 +15,17 @@ router.get('/:id', authenticateToken, borrowingController.getBorrowingById);
 router.get('/overdue/list', authenticateToken, authorize('admin', 'staff'), borrowingController.getOverdueBorrowings);
 
 // Get user borrowing history
-router.get('/user/:user_id', authenticateToken, borrowingController.getUserBorrowingHistory);
+router.get('/history/:user_id', authenticateToken, borrowingController.getUserBorrowingHistory);
 
 // Create borrowing
-router.post('/', authenticateToken, authorize('guru', 'staff'), validateBorrowing(), validateRequest, borrowingController.createBorrowing);
+router.post('/',
+  authenticateToken,
+  validateBorrowing(),
+  validateRequest,
+  borrowingController.createBorrowing
+);
 
 // Return borrowing
-router.put('/:id/return', authenticateToken, borrowingController.returnBorrowing);
+router.post('/:id/return', authenticateToken, borrowingController.returnBorrowing);
 
 module.exports = router;
